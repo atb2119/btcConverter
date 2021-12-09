@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/getPrice", btcController.getPrice, (req, res) => {
-  res.status(200).send({ price: res.locals.price });
+  res.status(200).send({ prices: res.locals.prices });
 });
 
 app.listen(3000, () => {

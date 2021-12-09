@@ -22,7 +22,7 @@ function InnerBox(props) {
         width: "30vw",
         height: "20vh",
         boxShadow: "20",
-        marginBottom: "40em",
+        marginBottom: "10em",
       }}
     >
       <TextField

@@ -4,15 +4,17 @@ import { Container, Box, Button, Typography } from "@mui/material";
 import InnerBox from "./InnerBox";
 import NavBar from "./NavBar";
 import fetch from "node-fetch";
+import Graph from "./Graph";
 
 function MainContainer() {
   const [usdPrice, setUsdPrice] = useState(0);
   const [btcPrice, setBtcPrice] = useState(0);
   const [fullBtcPrice, setFullBtcPrice] = useState(0)
+  const [weekPrices, setWeekPrices] = useState([])
   const getPrice = () => {
     fetch("/getPrice")
       .then((res) => res.json())
-      .then((data) => setBtcPrice(usdPrice / (data.price / 1000)))
+      .then((data) => setBtcPrice(usdPrice / (data.prices[0] / 1000)))
       .catch((err) => console.log("getPrice error", err));
   };
 
@@ -20,7 +22,7 @@ function MainContainer() {
     const fetchPrice = () => {
       fetch("/getPrice")
         .then((res) => res.json())
-        .then((data) => {setUsdPrice(data.price / 1000); setFullBtcPrice(data.price)})
+        .then((data) => {setUsdPrice(data.prices[0] / 1000); setFullBtcPrice(data.prices[0]); setWeekPrices(data.prices)})
         .then(setBtcPrice(1))
         .catch((err) => console.log("useffect fetchprice error", err));
     };
@@ -52,6 +54,8 @@ function MainContainer() {
         setBtcPrice={setBtcPrice}
         getPrice={getPrice}
       />
+      <Graph weekPrices={weekPrices}>
+      </Graph>
     </Box>
   );
 }
