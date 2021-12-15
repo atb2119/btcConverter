@@ -11,8 +11,9 @@ import "@fontsource/roboto/700.css";
 const theme = createTheme({
   palette: {
     background: {
-      paper: "#1A659E",
-      inner: "#F7F4F3",
+      paper: "#a8dadc",
+      inner: "#f1faee",
+      appBar: '#457b9d'
     },
   },
 });

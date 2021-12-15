@@ -1,4 +1,5 @@
 import React from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -7,8 +8,13 @@ import {
   Container,
 } from "@mui/material";
 
+import UseAnimations from 'react-useanimations'
+import arrowUp from 'react-useanimations/lib/arrowUp'
+
 function InnerBox(props) {
-  
+
+  const direction = props.swap ? 'rotate(270deg)' : 'rotate(90deg)'
+
   return (
     <Box
       sx={{
@@ -36,9 +42,22 @@ function InnerBox(props) {
           ),
         }}
       />
-      <Box sx={{ fontSize: 50, marginBottom: "1em" }}>=</Box>
+      <Box sx={{ fontSize: 50, marginBottom: "1em" }}>
+        <div style={{transform: `${direction}`}} onClick={() => props.setSwap(!props.swap)}>
+        
+           <UseAnimations
+          animation={arrowUp}
+          size={56}
+          loop={false}
+          autoplay={false}
+        />
+        
+          
+        </div>
+      </Box>
       <TextField
         label="mBTC amount"
+        onChange={(e) => props.setBtcPrice(e.target.value)}
         value={props.btcPrice}
         sx={{ marginBottom: "3em", width: "10em" }}
         InputProps={{

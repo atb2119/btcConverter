@@ -36,5 +36,9 @@ module.exports = {
         use: ["style-loader", "css-loader"],
       },
     ]
+  },
+  resolve: {
+    extensions: ['.js', '.jsx'],
+    modules: [path.resolve('./client'), 'node_modules']
   }
 }

@@ -34,7 +34,7 @@ function Graph(props) {
     labels: last7Days(),
     datasets: [
       {
-        label: 'Last 7 Days',
+        label: 'mBTC - Last 7 Days',
         fill: false,
         lineTension: 0.5,
         backgroundColor: 'rgba(75,192,192,1)',

@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { Container, Box, Button, Typography } from "@mui/material";
+import { Container, Box, Button, Typography, Snackbar, Alert } from "@mui/material";
 import InnerBox from "./InnerBox";
 import NavBar from "./NavBar";
 import fetch from "node-fetch";
@@ -8,14 +8,25 @@ import Graph from "./Graph";
 
 function MainContainer() {
   const [usdPrice, setUsdPrice] = useState(0);
-  const [btcPrice, setBtcPrice] = useState(0);
+  const [btcPrice, setBtcPrice] = useState(1);
   const [fullBtcPrice, setFullBtcPrice] = useState(0)
   const [weekPrices, setWeekPrices] = useState([])
+  const [swap, setSwap] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+
+  const handleErrorClose = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setLoadError(false);
+  }
+
   const getPrice = () => {
     fetch("/getPrice")
       .then((res) => res.json())
-      .then((data) => setBtcPrice(usdPrice / (data.prices[0] / 1000)))
-      .catch((err) => console.log("getPrice error", err));
+      .then((data) => {
+        setWeekPrices(data.prices);
+        swap ? setUsdPrice((data.prices[0] / 1000) * btcPrice) : setBtcPrice(usdPrice / (data.prices[0] / 1000))
+      })
+      .catch((err) => {console.log("getPrice error", err); setLoadError(true)});
   };
 
   useEffect(() => {
@@ -24,7 +35,7 @@ function MainContainer() {
         .then((res) => res.json())
         .then((data) => {setUsdPrice(data.prices[0] / 1000); setFullBtcPrice(data.prices[0]); setWeekPrices(data.prices)})
         .then(setBtcPrice(1))
-        .catch((err) => console.log("useffect fetchprice error", err));
+        .catch((err) => {console.log("getPrice error", err); setLoadError(true)});
     };
     fetchPrice();
   }, []);
@@ -44,6 +55,16 @@ function MainContainer() {
       }}
     >
       <NavBar fullBtcPrice={fullBtcPrice} />
+      <Snackbar
+      anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+      open={loadError}
+      autoHideDuration={5000}
+      onClose={handleErrorClose}
+      >
+        <Alert onClose={handleErrorClose} severity="error" sx={{width: '100%'}}>
+          Error fetching prices, please wait a second and try again.
+        </Alert>
+      </Snackbar>
       <Typography variant="h3" sx={{ p: "1em", fontWeight: "medium" }}>
         mBTC Converter
       </Typography>
@@ -53,6 +74,8 @@ function MainContainer() {
         btcPrice={btcPrice}
         setBtcPrice={setBtcPrice}
         getPrice={getPrice}
+        swap={swap}
+        setSwap={setSwap}
       />
       <Graph weekPrices={weekPrices}>
       </Graph>
