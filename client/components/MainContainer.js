@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { Container, Box, Button, Typography, Snackbar, Alert } from "@mui/material";
+import { Box, Typography, Snackbar, Alert } from "@mui/material";
 import InnerBox from "./InnerBox";
 import NavBar from "./NavBar";
 import fetch from "node-fetch";
@@ -9,35 +9,50 @@ import Graph from "./Graph";
 function MainContainer() {
   const [usdPrice, setUsdPrice] = useState(0);
   const [btcPrice, setBtcPrice] = useState(1);
-  const [fullBtcPrice, setFullBtcPrice] = useState(0)
-  const [weekPrices, setWeekPrices] = useState([])
+  const [fullBtcPrice, setFullBtcPrice] = useState(0);
+  const [weekPrices, setWeekPrices] = useState([]);
   const [swap, setSwap] = useState(false);
   const [loadError, setLoadError] = useState(false);
 
   const handleErrorClose = (event, reason) => {
-    if (reason === 'clickaway') return;
+    if (reason === "clickaway") return;
     setLoadError(false);
-  }
+  };
 
+  //for initial load and refresh button - auto populates usd price per 1 mBTC
+  const refresh = () => {
+    fetch("/getPrice")
+      .then((res) => res.json())
+      .then((data) => {
+        setUsdPrice(data.prices[0] / 1000);
+        setFullBtcPrice(data.prices[0]);
+        setWeekPrices(data.prices);
+      })
+      .then(setBtcPrice(1))
+      .catch((err) => {
+        console.log("getPrice error", err);
+        setLoadError(true);
+      });
+  };
+
+  //for clicking convert button - fetch latest data, check conversion direction and render accordingly
   const getPrice = () => {
     fetch("/getPrice")
       .then((res) => res.json())
       .then((data) => {
         setWeekPrices(data.prices);
-        swap ? setUsdPrice((data.prices[0] / 1000) * btcPrice) : setBtcPrice(usdPrice / (data.prices[0] / 1000))
+        swap
+          ? setUsdPrice((data.prices[0] / 1000) * btcPrice)
+          : setBtcPrice(usdPrice / (data.prices[0] / 1000));
       })
-      .catch((err) => {console.log("getPrice error", err); setLoadError(true)});
+      .catch((err) => {
+        console.log("getPrice error", err);
+        setLoadError(true);
+      });
   };
 
   useEffect(() => {
-    const fetchPrice = () => {
-      fetch("/getPrice")
-        .then((res) => res.json())
-        .then((data) => {setUsdPrice(data.prices[0] / 1000); setFullBtcPrice(data.prices[0]); setWeekPrices(data.prices)})
-        .then(setBtcPrice(1))
-        .catch((err) => {console.log("getPrice error", err); setLoadError(true)});
-    };
-    fetchPrice();
+    getPrice();
   }, []);
 
   return (
@@ -54,14 +69,18 @@ function MainContainer() {
         padding: "0",
       }}
     >
-      <NavBar fullBtcPrice={fullBtcPrice} />
+      <NavBar fullBtcPrice={fullBtcPrice} refresh={refresh} />
       <Snackbar
-      anchorOrigin={{vertical: 'top', horizontal: 'center'}}
-      open={loadError}
-      autoHideDuration={5000}
-      onClose={handleErrorClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={loadError}
+        autoHideDuration={5000}
+        onClose={handleErrorClose}
       >
-        <Alert onClose={handleErrorClose} severity="error" sx={{width: '100%'}}>
+        <Alert
+          onClose={handleErrorClose}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
           Error fetching prices, please wait a second and try again.
         </Alert>
       </Snackbar>
@@ -77,8 +96,7 @@ function MainContainer() {
         swap={swap}
         setSwap={setSwap}
       />
-      <Graph weekPrices={weekPrices}>
-      </Graph>
+      <Graph weekPrices={weekPrices}></Graph>
     </Box>
   );
 }
